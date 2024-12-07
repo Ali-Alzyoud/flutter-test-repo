@@ -1,0 +1,126 @@
+{
+  "project_info": {
+    "project_number": "249018774626",
+    "project_id": "curapushnotification",
+    "storage_bucket": "curapushnotification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249018774626:android:681b28e53a7182e3050d3b",
+        "android_client_info": {
+          "package_name": "com.curashell.doctorapp.droid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChm28HH-xVdPF0gayC9HF9moMwExo-b1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249018774626:android:ca25e5998060b7e3050d3b",
+        "android_client_info": {
+          "package_name": "com.curashell.userapp.droid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChm28HH-xVdPF0gayC9HF9moMwExo-b1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249018774626:android:b79ddcd9c894b4dd050d3b",
+        "android_client_info": {
+          "package_name": "com.ubieva.cura.doctorapp.droid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChm28HH-xVdPF0gayC9HF9moMwExo-b1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249018774626:android:1c7280c7088696a6050d3b",
+        "android_client_info": {
+          "package_name": "com.ubieva.cura.userapp.droid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChm28HH-xVdPF0gayC9HF9moMwExo-b1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249018774626-snnhi1fa3dtd387p1qktc3tutgm5aogg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
