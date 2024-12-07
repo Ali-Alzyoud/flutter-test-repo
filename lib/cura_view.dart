@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 // import 'dart:ffi';
 
 import 'package:flutter/material.dart';
@@ -26,19 +27,22 @@ enum CuraSDKJourneys {
 class CuraSDKView extends StatefulWidget {
   @override
   State<CuraSDKView> createState() => _CuraSDKViewState();
-
   static final CuraSDKView _instance = CuraSDKView._internal();
+  static final GlobalKey<_CuraSDKViewState> _key = GlobalKey();
   // String userAgent =
   //     Platform.isAndroid ? "Flutter Android WebView" : "Flutter iOS WebView";
 
   factory CuraSDKView() => _instance;
 
-  late WebViewController _webViewController;
+
+  CuraSDKView._internal() : super(key: _key);
+
+
+  WebViewController? _webViewController;
   // bool _isWebViewVisible = false;
-  bool _isWebViewInitialized = false;
   bool _curaIsInitialized = false;
   late String _webViewUrl;
-  late String _journey = "/consultations";
+  String _journey = "/consultations";
   // Properties to be passed to the WebView
   late String apiKey;
   late String organizationId;
@@ -50,10 +54,6 @@ class CuraSDKView extends StatefulWidget {
   late bool isInstantConsultPaymentHandledByHostApp = false;
   late bool isModal = true;
   late bool isAuthenticationHandledByHostApp = true;
-  late String? userInfo;
-  late String? userId;
-  late String? jwtToken;
-  late String? refreshToken;
 
   static final StreamController<String> _eventOnDismiss =
       StreamController<String>.broadcast();
@@ -65,7 +65,7 @@ class CuraSDKView extends StatefulWidget {
   // Expose the stream for listeners
   static Stream<String> get eventPresent => _eventOnPresent.stream;
 
-  late String? deviceToken;
+  String? deviceToken;
   // VoidCallback? onInvokeDismissCuraCalled;
   // VoidCallback? onPresentLoginCalled;
   // Function(String requestId, double amount)? onPresentPaymentScreenCalled;
@@ -75,8 +75,6 @@ class CuraSDKView extends StatefulWidget {
   //     navigatorKey; //needed to open cura screen from sdk for push notification purpose
   // Completer<Object>? loginCompleter;
   // Completer<Object>? initPaymentCompleter;
-
-  CuraSDKView._internal();
 
   // Set Journey
   static void setJourney(CuraSDKJourneys journey) {
@@ -95,23 +93,25 @@ class CuraSDKView extends StatefulWidget {
         break;
       default:
     }
-    _instance._webViewController.reload();
+
+    _instance._loadWebView(forceReload: true);
+    _key.currentState?.updateJourney(CuraSDKJourneys.consultations);
   }
 
-  Future<void> printAllStoredValues() async {
-    final prefs = await SharedPreferences.getInstance();
+  // Future<void> printAllStoredValues() async {
+  //   final prefs = await SharedPreferences.getInstance();
 
-    Set<String> keys = prefs.getKeys();
+  //   Set<String> keys = prefs.getKeys();
 
-    if (keys.isEmpty) {
-      print("No values found in SharedPreferences.");
-    } else {
-      for (String key in keys) {
-        final value = prefs.get(key);
-        print("Key: $key, Value: $value");
-      }
-    }
-  }
+  //   if (keys.isEmpty) {
+  //     print("No values found in SharedPreferences.");
+  //   } else {
+  //     for (String key in keys) {
+  //       final value = prefs.get(key);
+  //       print("Key: $key, Value: $value");
+  //     }
+  //   }
+  // }
 
 
   void initialize({
@@ -153,6 +153,7 @@ class CuraSDKView extends StatefulWidget {
     // onPresentPaymentScreenCalled = onPresentPaymentScreen;
     // this.navigatorKey = navigatorKey;
 
+
     _loadWebView(); // Preload WebView in the background
   }
 
@@ -177,7 +178,7 @@ Future<void> _handleRecordingPermissions(String message) async {
 
   void _initializeJavaScriptChannels() {
     _webViewController
-      ..addJavaScriptChannel(
+      ?..addJavaScriptChannel(
         "flutter_invokeDismissCura",
         onMessageReceived: (message) {
           hideCuraScreen();
@@ -244,7 +245,7 @@ Future<void> _handleRecordingPermissions(String message) async {
             })();
           """;
 
-            _webViewController.runJavaScript(jsFunction).catchError((error) {
+            _webViewController?.runJavaScript(jsFunction).catchError((error) {
               print("Error sending onFlutterResponse result to JavaScript: $error");
             });
 
@@ -290,7 +291,7 @@ Future<void> _handleRecordingPermissions(String message) async {
     window.onRecordingPermissionsResult(${jsonEncode(permissionStatus)});
   """;
 
-    _webViewController.runJavaScript(jsFunction).catchError((error) {
+    _webViewController?.runJavaScript(jsFunction).catchError((error) {
       print("Error sending permissions result to JavaScript: $error");
     });
   }
@@ -313,7 +314,7 @@ Future<void> _handleRecordingPermissions(String message) async {
 
   Future<void> _setUpVideoCallSetting() async {
     // Set up inline playback for iOS
-    await _webViewController.runJavaScript('''
+    await _webViewController?.runJavaScript('''
     document.querySelectorAll('video').forEach(video => {
       video.setAttribute('playsinline', 'true');
       video.setAttribute('webkit-playsinline', 'true');
@@ -322,7 +323,8 @@ Future<void> _handleRecordingPermissions(String message) async {
   }
 
   void _loadWebView({bool forceReload = false}) async {
-    if (!_isWebViewInitialized || forceReload)
+    if(!_curaIsInitialized) return;
+    if (_webViewController == null || forceReload)
     {
       late final PlatformWebViewControllerCreationParams params;
 
@@ -354,13 +356,12 @@ Future<void> _handleRecordingPermissions(String message) async {
       /**
        * Allow IOS Inspect Element
        */
-      if (_webViewController.platform is WebKitWebViewController) {
-        (_webViewController.platform as WebKitWebViewController)
+      if (_webViewController?.platform is WebKitWebViewController) {
+        (_webViewController?.platform as WebKitWebViewController)
             .setInspectable(true);
       }
 
       _initializeJavaScriptChannels();
-      _isWebViewInitialized = true;
     }
     
   }
@@ -372,7 +373,7 @@ Future<void> _handleRecordingPermissions(String message) async {
   //     writable: false,
   //   });
   //   """;
-  //   _webViewController.runJavaScript(userAgentScript);
+  //   _webViewController?.runJavaScript(userAgentScript);
   // }
 
   Future<void> _handleLogin() async {
@@ -421,10 +422,12 @@ void authenticate(Map<String, dynamic> result) async {
 Future<void> logout() async {
     try {
       await CuraAuth.logout();
-      await _webViewController.runJavaScript('''
+      if(_webViewController != null){
+        await _webViewController?.runJavaScript('''
         localStorage.clean();
       ''');
       _loadWebView(forceReload: true);
+      }
       print("Logout successful.");
     } catch (e) {
       print("Error during logout: $e");
@@ -451,18 +454,18 @@ Future<String?> getDeviceToken() async {
     }
   }
 
-  void sendLoginResultToJavaScript(String result) async {
-    final jsFunction =
-        "window.onLoginResponse && window.onLoginResponse('$result');";
-    try {
-      print("Login result runJavaScript");
+  // void sendLoginResultToJavaScript(String result) async {
+  //   final jsFunction =
+  //       "window.onLoginResponse && window.onLoginResponse('$result');";
+  //   try {
+  //     print("Login result runJavaScript");
 
-      await _webViewController.runJavaScript(jsFunction);
-      print("Login result sent to JavaScript successfully");
-    } catch (error) {
-      print("Error sending login result to JavaScript: $error");
-    }
-  }
+  //     await _webViewController?.runJavaScript(jsFunction);
+  //     print("Login result sent to JavaScript successfully");
+  //   } catch (error) {
+  //     print("Error sending login result to JavaScript: $error");
+  //   }
+  // }
 
   // void sendPaymentResultToJavaScript(String result) async {
   //   final jsFunction =
@@ -470,7 +473,7 @@ Future<String?> getDeviceToken() async {
   //   try {
   //     print("payment result runJavaScript");
 
-  //     await _webViewController.runJavaScript(jsFunction);
+  //     await _webViewController?.runJavaScript(jsFunction);
   //     print("payment result sent to JavaScript successfully");
   //   } catch (error) {
   //     print("Error sending payment result to JavaScript: $error");
@@ -502,7 +505,7 @@ Future<String?> getDeviceToken() async {
     """;
     }
 
-    _webViewController.runJavaScript(jsCode).catchError((error) {
+    _webViewController?.runJavaScript(jsCode).catchError((error) {
       print("JavaScript execution failed: $error");
     });
   }
@@ -524,7 +527,7 @@ Future<String?> getDeviceToken() async {
       console.log('Local storage values set from Flutter');
     """;
 
-    _webViewController.runJavaScript(jsCode);
+    _webViewController?.runJavaScript(jsCode);
   }
 
   // @override
@@ -652,14 +655,14 @@ Future<String?> getDeviceToken() async {
     var jsCode = """
     window.onNotificationTapped($stringData);  
   """;
-    _webViewController.runJavaScript(jsCode);
+    _webViewController?.runJavaScript(jsCode);
   }
 
 // Helper method to get the current screen from the WebView's local storage
   Future<String?> getCurrentScreenFromWebView() async {
     try {
-      if (_isWebViewInitialized) {
-        final result = await _webViewController.currentUrl();
+      if (_webViewController != null) {
+        final result = await _webViewController?.currentUrl();
         print(result);
         return result;
       }
@@ -687,7 +690,7 @@ Future<String?> getLocalStorageValue(String key) async {
   """;
     try {
       final result =
-          await _webViewController.runJavaScriptReturningResult(jsCode);
+          await _webViewController?.runJavaScriptReturningResult(jsCode);
       return result as String?;
     } catch (e) {
       print("Error retrieving value for key '$key': $e");
@@ -710,18 +713,19 @@ Future<String?> getLocalStorageValue(String key) async {
 //   }
 // }
 class _CuraSDKViewState extends State<CuraSDKView> {
-  bool isAuthenticating = false;
-  void updateState(int value) {
+  var journey = CuraSDKJourneys.instantConsultation;
+  void updateJourney(newJoureny) {
     setState(() {
-      isAuthenticating = true;
+      journey = newJoureny;
     });
   }
   @override
   Widget build(BuildContext context) {
-    if (widget._curaIsInitialized) {
+    widget._loadWebView();
+    if (widget._webViewController != null) {
       widget._loadWebView();
       return Center(
-          child: WebViewWidget(controller: widget._webViewController));
+          child: WebViewWidget(controller: widget._webViewController!));
     } else {
       return const Center(child: Text("initialzied Cura First!!!"));
     }
